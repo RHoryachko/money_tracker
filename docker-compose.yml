@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:////data/expenses.db
+    volumes:
+      - db_data:/data
+
+  bot:
+    build: ./bot
+    env_file:
+      - ./bot/.env
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
