@@ -51,6 +51,12 @@ async def process_end_date(message: types.Message, state: FSMContext):
 
     data = await state.get_data()
     report = await api_client.get_expenses_report(data.get("start_date"), data.get("end_date"))
+    if report is None:
+        await message.answer(
+            "У базі не знайдено витрат. Будь ласка, додайте деякі витрати спочатку. 📝",
+            reply_markup=main_menu_kb()
+        )
+        return
     await message.answer_document(
         BufferedInputFile(report, filename="expenses_report.xlsx"),
         reply_markup=main_menu_kb()

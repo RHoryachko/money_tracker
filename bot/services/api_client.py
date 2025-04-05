@@ -1,8 +1,10 @@
+import logging
 import aiohttp
 
 from datetime import date
 from config import settings
 
+logger = logging.getLogger(__name__)
 
 class APIClient:
     def __init__(self):
@@ -19,6 +21,8 @@ class APIClient:
             params["start_date"] = start_date.isoformat()
         if end_date:
             params["end_date"] = end_date.isoformat()
+
+        
         return await self._make_request("GET", "/expenses", params=params)
     
     async def get_expenses_report(self, start_date: date = None, end_date: date = None):
@@ -29,6 +33,11 @@ class APIClient:
             params["end_date"] = end_date.isoformat()
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{self.base_url}/expenses/report/", params=params) as response:
+                if response.status == 404:
+                    logger.info("--------------------------------")
+                    logger.info("404 Error: No expenses found")
+                    logger.info("--------------------------------")
+                    return None
                 return await response.read()
     
     async def create_expense(self, name: str, date: date, amount: float):

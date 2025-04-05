@@ -22,6 +22,12 @@ api_client = APIClient()
 @router.message(F.text == "Редагувати витрату 📝")
 async def start_edit_expense(message: types.Message, state: FSMContext):
     report = await api_client.get_expenses_report()
+    if report is None:
+        await message.answer(
+            "У базі не знайдено витрат. Будь ласка, додайте деякі витрати спочатку. 📝",
+            reply_markup=main_menu_kb()
+        )
+        return
     await message.answer_document(
         BufferedInputFile(report, filename="all_expenses.xlsx")
     )

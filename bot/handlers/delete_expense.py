@@ -23,16 +23,12 @@ async def start_delete_expense(message: types.Message, state: FSMContext):
     logger.info("Report type: %s", type(report))
     logger.info("--------------------------------")
     
-    try:
-        if report.get("status_code") == 404:
-            
-            await message.answer(
-                "У базі не знайдено витрат. Будь ласка, додайте деякі витрати спочатку. 📝",
-                reply_markup=main_menu_kb()
-            )
-            return
-    except:
-        pass
+    if report is None:
+        await message.answer(
+            "У базі не знайдено витрат. Будь ласка, додайте деякі витрати спочатку. 📝",
+            reply_markup=main_menu_kb()
+        )
+        return
     
     await message.answer_document(
         BufferedInputFile(report, filename="all_expenses.xlsx")
