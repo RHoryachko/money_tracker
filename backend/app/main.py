@@ -79,6 +79,10 @@ async def get_expenses_report(
     if not expenses:
         raise HTTPException(status_code=404, detail="No expenses found")
         
+    # Calculate totals
+    total_uah = sum(expense.amount_uah for expense in expenses)
+    total_usd = sum(expense.amount_usd for expense in expenses)
+        
     # Create Excel report
     output = BytesIO()
     workbook = xlsxwriter.Workbook(output)
@@ -96,6 +100,12 @@ async def get_expenses_report(
         worksheet.write(row, 2, expense.date.strftime("%Y-%m-%d"))
         worksheet.write(row, 3, expense.amount_uah)
         worksheet.write(row, 4, expense.amount_usd)
+    
+    # Write totals
+    total_row = len(expenses) + 1
+    worksheet.write(total_row, 2, "TOTAL:")
+    worksheet.write(total_row, 3, total_uah)
+    worksheet.write(total_row, 4, total_usd)
     
     workbook.close()
     output.seek(0)
