@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -9,6 +11,7 @@ from keyboards.main_menu import main_menu_kb
 
 router = Router()
 
+logger = logging.getLogger(__name__)
 
 class EditExpenseStates(StatesGroup):
     waiting_for_id = State()
@@ -21,7 +24,7 @@ api_client = APIClient()
 
 @router.message(F.text == "Редагувати витрату 📝")
 async def start_edit_expense(message: types.Message, state: FSMContext):
-    report = await api_client.get_expenses_report()
+    report = await api_client.get_expenses_report(user_id=message.from_user.id)
     if report is None:
         await message.answer(
             "У базі не знайдено витрат. Будь ласка, додайте деякі витрати спочатку. 📝",
@@ -62,15 +65,24 @@ async def process_edit_amount(message: types.Message, state: FSMContext):
         
         data = await state.get_data()
         response = await api_client.update_expense(
+            user_id=message.from_user.id,
             expense_id=data['expense_id'],
             name=data['name'],
             amount=amount
         )
+
+        logger.info("--------------------------------")
+        logger.info("Response: %s", response)
+        logger.info("--------------------------------")
+
+        if isinstance(response, dict) and 'detail' in response:
+            await message.answer("Витрата з таким ID не знайдена. Будь ласка, спробуйте ще раз. 🔍")
+            return
         
         await message.answer(
             f"Витрата успішно оновлена!\n"
-            f"Нова назва: {data['name']}\n"
-            f"Нова сума: {amount} UAH",
+            f"Назва: {data['name']}\n"
+            f"Сума: {amount} UAH",
             reply_markup=main_menu_kb()
         )
         await state.clear()

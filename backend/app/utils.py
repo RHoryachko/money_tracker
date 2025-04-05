@@ -8,8 +8,8 @@ def get_usd_uah_rate():
         url = "https://bank.gov.ua/ua/markets/exchangerates"
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        usd_row = soup.find('td', text='Долар США').find_parent('tr')
-        rate = float(usd_row.find_all('td')[1].text.replace(',', '.'))
+        usd_row = soup.find('td', text='USD').find_parent('tr')
+        rate = float(usd_row.find('td', {'data-label': 'Офіційний курс'}).text.replace(',', '.'))
         return rate
     except Exception:
         return 36.5

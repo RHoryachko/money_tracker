@@ -3,6 +3,7 @@ from datetime import date
 
 
 class ExpenseBase(BaseModel):
+    user_id: int
     name: str
     date: date
     amount_uah: float

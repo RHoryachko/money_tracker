@@ -47,6 +47,7 @@ async def process_amount(message: Message, state: FSMContext):
         
         data = await state.get_data()
         response = await api_client.create_expense(
+            user_id=message.from_user.id,
             name=data['name'],
             date=data['date'],
             amount=amount

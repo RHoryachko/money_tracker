@@ -50,7 +50,11 @@ async def process_end_date(message: types.Message, state: FSMContext):
             return
 
     data = await state.get_data()
-    report = await api_client.get_expenses_report(data.get("start_date"), data.get("end_date"))
+    report = await api_client.get_expenses_report(
+        user_id=message.from_user.id,
+        start_date=data.get("start_date"),
+        end_date=data.get("end_date")
+    )
     if report is None:
         await message.answer(
             "У базі не знайдено витрат. Будь ласка, додайте деякі витрати спочатку. 📝",

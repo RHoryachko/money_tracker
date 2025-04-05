@@ -17,7 +17,7 @@ api_client = APIClient()
 
 @router.message(F.text == "Видалити витрату 🗑")
 async def start_delete_expense(message: types.Message, state: FSMContext):
-    report = await api_client.get_expenses_report()
+    report = await api_client.get_expenses_report(user_id=message.from_user.id)
     logger.info("--------------------------------")
     logger.info("Report content: %s", report)
     logger.info("Report type: %s", type(report))
@@ -40,14 +40,14 @@ async def start_delete_expense(message: types.Message, state: FSMContext):
 async def process_expense_id(message: types.Message, state: FSMContext):
     try:
         expense_id = int(message.text)
-        success = await api_client.delete_expense(expense_id)
-        if success:
-            await message.answer("Витрата успішно видалена! 🗑", reply_markup=main_menu_kb())
+        response = await api_client.delete_expense(user_id=message.from_user.id, expense_id=expense_id)
+        if response.get('success'):
+            await message.answer("Витрата успішно видалена! ✅", reply_markup=main_menu_kb())
         else:
-            await message.answer("Не вдалося видалити витрату. Будь ласка, перевірте ID. ❌", reply_markup=main_menu_kb())
+            await message.answer("Витрата з таким ID не знайдена. Будь ласка, спробуйте ще раз. 🔍")
         await state.clear()
     except ValueError:
-        await message.answer("Будь ласка, введіть коректний цілий ID. 🔢")
+        await message.answer("Будь ласка, введіть коректний ID витрати. 🔢")
 
 def register_delete_expense_handlers(dp):
     dp.register_message_handler(start_delete_expense, text="Delete Expense", state="*")

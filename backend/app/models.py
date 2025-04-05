@@ -11,3 +11,4 @@ class Expense(Base):
     date = Column(Date)
     amount_uah = Column(Float)
     amount_usd = Column(Float)
+    user_id = Column(Integer)
